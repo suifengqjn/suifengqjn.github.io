@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>iOS视频边下边播--缓存视频数据流 | suifeng‘blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="google搜索“iOS视频变下边播”，有好几篇博客写到了实现方法，其实只有一篇，其他都是copy的，不过他们都是使用的本地代理服务器的方式，原理很简单，但是缺点也很明显，需要自己写一个本地代理服务器或者使用第三方库httpSever。如果使用httpSever作为本地代理服务器，如果只缓存一个视频是没有问题的，如果缓存多个视频互相切换，本地代理服务器提供的数据很不稳定，crash概率非常大。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS视频边下边播--缓存视频数据流">
+<meta property="og:url" content="http://suifengqjn/github.io/2016/02/25/iOS视频边下边播-缓存视频数据流/index.html">
+<meta property="og:site_name" content="suifeng‘blog">
+<meta property="og:description" content="google搜索“iOS视频变下边播”，有好几篇博客写到了实现方法，其实只有一篇，其他都是copy的，不过他们都是使用的本地代理服务器的方式，原理很简单，但是缺点也很明显，需要自己写一个本地代理服务器或者使用第三方库httpSever。如果使用httpSever作为本地代理服务器，如果只缓存一个视频是没有问题的，如果缓存多个视频互相切换，本地代理服务器提供的数据很不稳定，crash概率非常大。">
+<meta property="og:image" content="https://raw.githubusercontent.com/suifengqjn/TBPlayer/master/TBPlayer/TBPlayer/screenShot/1.png">
+<meta property="og:updated_time" content="2016-02-25T08:08:16.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS视频边下边播--缓存视频数据流">
+<meta name="twitter:description" content="google搜索“iOS视频变下边播”，有好几篇博客写到了实现方法，其实只有一篇，其他都是copy的，不过他们都是使用的本地代理服务器的方式，原理很简单，但是缺点也很明显，需要自己写一个本地代理服务器或者使用第三方库httpSever。如果使用httpSever作为本地代理服务器，如果只缓存一个视频是没有问题的，如果缓存多个视频互相切换，本地代理服务器提供的数据很不稳定，crash概率非常大。">
+  
+    <link rel="alternative" href="/atom.xml" title="suifeng‘blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="http://tp3.sinaimg.cn/2806725090/180/5683426470/1" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">夜千寻墨</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">suifeng</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+							<li><a href="/categories/iOS">iOS</a></li>
+				        
+							<li><a href="/instagram">我的相册</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="http://suifengqjn.github.io/" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/dearqjn?source=blog&is_all=1" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+					        
+								<a class="google" target="_blank" href="http://www.jianshu.com/users/527ecf8c8753/latest_articles" title="google">google</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/AVplayer/" style="font-size: 10px;">AVplayer</a> <a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/性能/" style="font-size: 10px;">性能</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jianshu.com/users/527ecf8c8753/latest_articles">我的简书博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/suifengqjn">github</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://hexo.io/">hexo</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">我是谁，我从哪里来，我到哪里去？我就是我，是颜色不一样的吃货…</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">夜千寻墨</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="http://tp3.sinaimg.cn/2806725090/180/5683426470/1" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">夜千寻墨</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">suifeng</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/iOS">iOS</a></li>
+		        
+					<li><a href="/instagram">我的相册</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="http://suifengqjn.github.io/" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/dearqjn?source=blog&is_all=1" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+			        
+						<a class="google" target="_blank" href="http://www.jianshu.com/users/527ecf8c8753/latest_articles" title="google">google</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-iOS视频边下边播-缓存视频数据流" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/02/25/iOS视频边下边播-缓存视频数据流/" class="article-date">
+  	<time datetime="2016-02-25T08:01:50.000Z" itemprop="datePublished">2016-02-25</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      iOS视频边下边播--缓存视频数据流
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AVplayer/">AVplayer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/iOS/">iOS</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>google搜索“iOS视频变下边播”，有好几篇博客写到了实现方法，其实只有一篇，其他都是copy的，不过他们都是使用的本地代理服务器的方式，原理很简单，但是缺点也很明显，需要自己写一个本地代理服务器或者使用第三方库httpSever。如果使用httpSever作为本地代理服务器，如果只缓存一个视频是没有问题的，如果缓存多个视频互相切换，本地代理服务器提供的数据很不稳定，crash概率非常大。</p>
+<hr>
+<p>这里我采用ios7以后系统自带的方法实现视频边下边播，这里的边下边播不是单独开一个子线程去下载，而是把视频播放的数据给保存到本地。简而言之，就是使用一遍的流量，既播放了视频，也保存了视频。<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#29992;&#21040;&#30340;&#26694;&#26550;&#65306;&#60;AVFoundation/AVFoundation.h&#62;&#10;&#10;&#29992;&#21040;&#30340;&#25773;&#25918;&#22120;&#65306;AVplayer</span><br></pre></td></tr></table></figure></p>
+<p>先说一下avplayer自身的播放原理，当我们给播放器设置好url等一些参数后，播放器就会向url所在的服务器发送请求(请求参数有两个值，一个是offset偏移量，另一个是length长度，其实就相当于NSRange一样)，服务器就根据range参数给播放器返回数据。这就是大致的原理，当然实际的过程还是略微比较复杂。</p>
+<hr>
+<p>###下面进入主题</p>
+<pre><code> #产品需求：
+*  1.支持正常播放器的一切功能，包括暂停、播放和拖拽
+
+* 2.如果视频加载完成且完整，将视频文件保存到本地cache，下一次播放本地cache中的视频，不再请求网络数据
+
+* 3.如果视频没有加载完（半路关闭或者拖拽）就不用保存到本地cache
+</code></pre><p><br></p>
+<pre><code> #实现方案:
+
+* 1.需要在视频播放器和服务器之间添加一层类似代理的机制，视频播放器不再直接访问服务器，而是访问代理对象，代理对象去访问服务器获得数据，之后返回给视频播放器，同时代理对象根据一定的策略缓存数据。
+
+* 2.AVURLAsset中的resourceLoader可以实现这个机制，resourceLoader的delegate就是上述的代理对象。
+
+* 3.视频播放器在开始播放之前首先检测是本地cache中是否有此视频，如果没有才通过代理获得数据，如果有，则直接播放本地cache中的视频即可。
+</code></pre><p><br></p>
+<pre><code> #视频播放器需要实现的功能
+
+* 1.有开始暂停按钮
+
+* 2.显示播放进度及总时长
+
+* 3.可以通过拖拽从任意位置开始播放视频
+
+* 4.视频加载中的过程和加载失败需要有相应的提示
+</code></pre><p><br></p>
+<pre><code> #代理对象需要实现的功能
+
+* 1.接收视频播放器的请求，并根据请求的range向服务器请求本地没有获得的数据
+
+* 2.缓存向服务器请求回的数据到本地
+
+* 3.如果向服务器的请求出现错误，需要通知给视频播放器，以便视频播放器对用户进行提示
+</code></pre><p><br></p>
+<p>###具体流程</p>
+<p><img src="https://raw.githubusercontent.com/suifengqjn/TBPlayer/master/TBPlayer/TBPlayer/screenShot/1.png" alt="image"><br><br></p>
+<pre><code>视频播放器处理流程
+</code></pre><ul>
+<li><p>1.当开始播放视频时，通过视频url判断本地cache中是否已经缓存当前视频，如果有，则直接播放本地cache中视频</p>
+</li>
+<li><p>2.如果本地cache中没有视频，则视频播放器向代理请求数据</p>
+</li>
+<li><p>3.加载视频时展示正在加载的提示（菊花转）</p>
+</li>
+<li><p>4.如果可以正常播放视频，则去掉加载提示，播放视频，如果加载失败，去掉加载提示并显示失败提示</p>
+</li>
+<li><p>5.在播放过程中如果由于网络过慢或拖拽原因导致没有播放数据时，要展示加载提示，跳转到第4步</p>
+</li>
+</ul>
+<p><br></p>
+<pre><code>代理对象处理流程
+</code></pre><ul>
+<li><p>1.当视频播放器向代理请求dataRequest时，判断代理是否已经向服务器发起了请求，如果没有，则发起下载整个视频文件的请求</p>
+</li>
+<li><p>2.如果代理已经和服务器建立链接，则判断当前的dataRequest请求的offset是否大于当前已经缓存的文件的offset，如果大于则取消当前与服务器的请求，并从offset开始到文件尾向服务器发起请求（此时应该是由于播放器向后拖拽，并且超过了已缓存的数据时才会出现）</p>
+</li>
+<li><p>3.如果当前的dataRequest请求的offset小于已经缓存的文件的offset，同时大于代理向服务器请求的range的offset，说明有一部分已经缓存的数据可以传给播放器，则将这部分数据返回给播放器（此时应该是由于播放器向前拖拽，请求的数据已经缓存过才会出现）</p>
+</li>
+<li><p>4.如果当前的dataRequest请求的offset小于代理向服务器请求的range的offset，则取消当前与服务器的请求，并从offset开始到文件尾向服务器发起请求（此时应该是由于播放器向前拖拽，并且超过了已缓存的数据时才会出现）</p>
+</li>
+<li><p>5.只要代理重新向服务器发起请求，就会导致缓存的数据不连续，则加载结束后不用将缓存的数据放入本地cache</p>
+</li>
+<li><p>6.如果代理和服务器的链接超时，重试一次，如果还是错误则通知播放器网络错误</p>
+</li>
+<li><p>7.如果服务器返回其他错误，则代理通知播放器网络错误</p>
+</li>
+</ul>
+<hr>
+<p>###resourceLoader的难点处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest&#10;&#123;&#10;    [self.pendingRequests addObject:loadingRequest];&#10;    [self dealWithLoadingRequest:loadingRequest];&#10;    &#10;    return YES;&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>播放器发出的数据请求从这里开始，我们保存从这里发出的所有请求存放到数组，自己来处理这些请求，当一个请求完成后，对请求发出finishLoading消息，并从数组中移除。正常状态下，当播放器发出下一个请求的时候，会把上一个请求给finish。</p>
+<p>下面这个方法发出的请求说明播放器自己关闭了这个请求，我们不需要再对这个请求进行处理，系统每次结束一个旧的请求，便必然会发出一个或多个新的请求，除了播放器已经获得整个视频完整的数据，这时候就不会再发起请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest&#10;&#123;&#10;    [self.pendingRequests removeObject:loadingRequest];&#10;    &#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>下面这个方法是对播放器发出的请求进行填充数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)respondWithDataForRequest:(AVAssetResourceLoadingDataRequest *)dataRequest&#10;&#123;&#10;    long long startOffset = dataRequest.requestedOffset;&#10;&#10;    if (dataRequest.currentOffset != 0) &#123;&#10;        startOffset = dataRequest.currentOffset;&#10;    &#125;&#10;    &#10;    if ((self.task.offset +self.task.downLoadingOffset) &#60; startOffset)&#10;    &#123;&#10;        //NSLog(@&#34;NO DATA FOR REQUEST&#34;);&#10;        return NO;&#10;    &#125;&#10;    &#10;    if (startOffset &#60; self.task.offset) &#123;&#10;        return NO;&#10;    &#125;&#10;    &#10;    NSData *filedata = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:_videoPath] options:NSDataReadingMappedIfSafe error:nil];&#10;    &#10;    // This is the total data we have from startOffset to whatever has been downloaded so far&#10;    NSUInteger unreadBytes = self.task.downLoadingOffset - ((NSInteger)startOffset - self.task.offset);&#10;    &#10;    // Respond with whatever is available if we can&#39;t satisfy the request fully yet&#10;    NSUInteger numberOfBytesToRespondWith = MIN((NSUInteger)dataRequest.requestedLength, unreadBytes);&#10;    &#10;    &#10;    [dataRequest respondWithData:[filedata subdataWithRange:NSMakeRange((NSUInteger)startOffset- self.task.offset, (NSUInteger)numberOfBytesToRespondWith)]];&#10;    &#10;    &#10;    &#10;    long long endOffset = startOffset + dataRequest.requestedLength;&#10;    BOOL didRespondFully = (self.task.offset + self.task.downLoadingOffset) &#62;= endOffset;&#10;&#10;    return didRespondFully;&#10;  &#10;    &#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>这是对存放所有的请求的数组进行处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)processPendingRequests&#10;&#123;&#10;    NSMutableArray *requestsCompleted = [NSMutableArray array];  //&#35831;&#27714;&#23436;&#25104;&#30340;&#25968;&#32452;&#10;    //&#27599;&#27425;&#19979;&#36733;&#19968;&#22359;&#25968;&#25454;&#37117;&#26159;&#19968;&#27425;&#35831;&#27714;&#65292;&#25226;&#36825;&#20123;&#35831;&#27714;&#25918;&#21040;&#25968;&#32452;&#65292;&#36941;&#21382;&#25968;&#32452;&#10;    for (AVAssetResourceLoadingRequest *loadingRequest in self.pendingRequests)&#10;    &#123;&#10;        [self fillInContentInformation:loadingRequest.contentInformationRequest]; //&#23545;&#27599;&#27425;&#35831;&#27714;&#21152;&#19978;&#38271;&#24230;&#65292;&#25991;&#20214;&#31867;&#22411;&#31561;&#20449;&#24687;&#10;        &#10;        BOOL didRespondCompletely = [self respondWithDataForRequest:loadingRequest.dataRequest]; //&#21028;&#26029;&#27492;&#27425;&#35831;&#27714;&#30340;&#25968;&#25454;&#26159;&#21542;&#22788;&#29702;&#23436;&#20840;&#10;        &#10;        if (didRespondCompletely) &#123;&#10;&#10;            [requestsCompleted addObject:loadingRequest];  //&#22914;&#26524;&#23436;&#25972;&#65292;&#25226;&#27492;&#27425;&#35831;&#27714;&#25918;&#36827; &#35831;&#27714;&#23436;&#25104;&#30340;&#25968;&#32452;&#10;            [loadingRequest finishLoading];&#10;            &#10;        &#125;&#10;    &#125;&#10;&#10;    [self.pendingRequests removeObjectsInArray:requestsCompleted];   //&#22312;&#25152;&#26377;&#35831;&#27714;&#30340;&#25968;&#32452;&#20013;&#31227;&#38500;&#24050;&#32463;&#23436;&#25104;&#30340;&#10;    &#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>resourceLoader的难点基本上就是上面这点了，说到播放器，下面便顺便讲下AVPlayer的难点。</p>
+<p>###难点：对播放器状态的捕获</p>
+<blockquote>
+<p>举个简单的例子，视频总长度60分，现在缓冲的数据才10分钟，然后拖动到20分钟的位置进行播放，在网速较慢的时候，视频从当前位置开始播放，必然会出现一段时间的卡顿，为了有一个更好的用户体验，在卡顿的时候，我们需要加一个菊花转的状态，现在问题就来了。</p>
+<p>在拖动到未缓冲区域内，是否需要加菊花转，如果加，要显示多久再消失，而且如果在网速很慢的时候，播放器如果等了太久，哪怕最后有数据了，播放器也已经“死”了，它自己无法恢复播放，这个时候需要我们人为的去恢复播放，如果恢复播放不成功，那么过一段时间需要再次恢复播放，是否恢复播放成功，这里也需要捕获其状态。所以，如果要有一个好的用户体验，我们需要时时知道播放器的状态。</p>
+</blockquote>
+<p>有两个状态需要捕获，一个是正在缓冲，一个是正在播放，监听播放的“playbackBufferEmpty”属性就可以捕获正在缓冲状态，播放器的时间监听器则可以捕获正在播放状态，我的demo中一共有4个状态：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef NS_ENUM(NSInteger, TBPlayerState) &#123;&#10;    TBPlayerStateBuffering = 1,&#10;    TBPlayerStatePlaying   = 2,&#10;    TBPlayerStateStopped   = 3,&#10;    TBPlayerStatePause     = 4&#10;&#125;;</span><br></pre></td></tr></table></figure>
+<p>这样可以对播放器更好的把握和处理了。<br>然后说一说在缓冲时候的处理，以及缓冲后多久去播放，处理方法：<br>进入缓冲状态后，缓冲2秒后去手动播放，如果播放不成功（缓冲的数据太少，还不足以播放），那就再缓冲2秒再次播放，如此循环，看详细代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)bufferingSomeSecond&#10;&#123;&#10;    // playbackBufferEmpty&#20250;&#21453;&#22797;&#36827;&#20837;&#65292;&#22240;&#27492;&#22312;bufferingOneSecond&#24310;&#26102;&#25773;&#25918;&#25191;&#34892;&#23436;&#20043;&#21069;&#20877;&#35843;&#29992;bufferingSomeSecond&#37117;&#24573;&#30053;&#10;    static BOOL isBuffering = NO;&#10;    if (isBuffering) &#123;&#10;        return;&#10;    &#125;&#10;    isBuffering = YES;&#10;    &#10;    // &#38656;&#35201;&#20808;&#26242;&#20572;&#19968;&#23567;&#20250;&#20043;&#21518;&#20877;&#25773;&#25918;&#65292;&#21542;&#21017;&#32593;&#32476;&#29366;&#20917;&#19981;&#22909;&#30340;&#26102;&#20505;&#26102;&#38388;&#22312;&#36208;&#65292;&#22768;&#38899;&#25773;&#25918;&#19981;&#20986;&#26469;&#10;    [self.player pause];&#10;    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^&#123;&#10;        &#10;        // &#22914;&#26524;&#27492;&#26102;&#29992;&#25143;&#24050;&#32463;&#26242;&#20572;&#20102;&#65292;&#21017;&#19981;&#20877;&#38656;&#35201;&#24320;&#21551;&#25773;&#25918;&#20102;&#10;        if (self.isPauseByUser) &#123;&#10;            isBuffering = NO;&#10;            return;&#10;        &#125;&#10;        &#10;        [self.player play];&#10;        // &#22914;&#26524;&#25191;&#34892;&#20102;play&#36824;&#26159;&#27809;&#26377;&#25773;&#25918;&#21017;&#35828;&#26126;&#36824;&#27809;&#26377;&#32531;&#23384;&#22909;&#65292;&#21017;&#20877;&#27425;&#32531;&#23384;&#19968;&#27573;&#26102;&#38388;&#10;        isBuffering = NO;&#10;        if (!self.currentPlayerItem.isPlaybackLikelyToKeepUp) &#123;&#10;            [self bufferingSomeSecond];&#10;        &#125;&#10;    &#125;);&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>这个demo花了我很长的时间，实现这个demo我也遇到了很多坑最后才完成的，现在我奉献出来，也许对你会有所帮助。如果你觉得不错，还请为我Star一个，也算是对我的支持和鼓励。</p>
+<p><a href="https://github.com/suifengqjn/TBPlayer" target="_blank" rel="external">demo下载地址</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/02/25/iOS卡顿监控/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">iOS卡顿监控</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis">
+  <div class="sharing addthis_toolbox share">
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="iOS视频边下边播-缓存视频数据流" data-title="iOS视频边下边播--缓存视频数据流" data-url="http://suifengqjn/github.io/2016/02/25/iOS视频边下边播-缓存视频数据流/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"yqxm"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 夜千寻墨
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://www.jianshu.com/users/527ecf8c8753/latest_articles/" target="_blank">suifeng</a>   <a href="http://www.jianshu.com/users/527ecf8c8753/latest_articles/" target="_blank">blog</a> Copyright © 2016
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  </div>
+</body>
+</html>

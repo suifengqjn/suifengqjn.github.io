@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>iOS卡顿监控 | suifeng‘blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在移动设备上开发软件,性能一直是我们最为关心的话题之一,我们作为程序员除了需要努力提高代码质量之外,及时发现和监控软件中那些造成性能低下的”罪魁祸首”也是我们神圣的职责.
+
+众所周知,iOS平台因为UIKit本身的特性,需要将所有的UI操作都放在主线程执行,所以也造成不少程序员都习惯将一些线程安全性不确定的逻辑,以及其它线程结束后的汇总工作等等放到了主线,所以主线程中包含的这些大量计算、IO、绘制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS卡顿监控">
+<meta property="og:url" content="http://suifengqjn/github.io/2016/02/25/iOS卡顿监控/index.html">
+<meta property="og:site_name" content="suifeng‘blog">
+<meta property="og:description" content="在移动设备上开发软件,性能一直是我们最为关心的话题之一,我们作为程序员除了需要努力提高代码质量之外,及时发现和监控软件中那些造成性能低下的”罪魁祸首”也是我们神圣的职责.
+
+众所周知,iOS平台因为UIKit本身的特性,需要将所有的UI操作都放在主线程执行,所以也造成不少程序员都习惯将一些线程安全性不确定的逻辑,以及其它线程结束后的汇总工作等等放到了主线,所以主线程中包含的这些大量计算、IO、绘制">
+<meta property="og:updated_time" content="2016-02-25T08:07:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS卡顿监控">
+<meta name="twitter:description" content="在移动设备上开发软件,性能一直是我们最为关心的话题之一,我们作为程序员除了需要努力提高代码质量之外,及时发现和监控软件中那些造成性能低下的”罪魁祸首”也是我们神圣的职责.
+
+众所周知,iOS平台因为UIKit本身的特性,需要将所有的UI操作都放在主线程执行,所以也造成不少程序员都习惯将一些线程安全性不确定的逻辑,以及其它线程结束后的汇总工作等等放到了主线,所以主线程中包含的这些大量计算、IO、绘制">
+  
+    <link rel="alternative" href="/atom.xml" title="suifeng‘blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="http://tp3.sinaimg.cn/2806725090/180/5683426470/1" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">夜千寻墨</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">suifeng</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						<li>友情链接</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+							<li><a href="/categories/iOS">iOS</a></li>
+				        
+							<li><a href="/instagram">我的相册</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="http://suifengqjn.github.io/" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/dearqjn?source=blog&is_all=1" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+					        
+								<a class="google" target="_blank" href="http://www.jianshu.com/users/527ecf8c8753/latest_articles" title="google">google</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/AVplayer/" style="font-size: 10px;">AVplayer</a> <a href="/tags/iOS/" style="font-size: 20px;">iOS</a> <a href="/tags/性能/" style="font-size: 10px;">性能</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jianshu.com/users/527ecf8c8753/latest_articles">我的简书博客</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://github.com/suifengqjn">github</a>
+			        
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="https://hexo.io/">hexo</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">我是谁，我从哪里来，我到哪里去？我就是我，是颜色不一样的吃货…</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">夜千寻墨</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="http://tp3.sinaimg.cn/2806725090/180/5683426470/1" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">夜千寻墨</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">suifeng</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/categories/iOS">iOS</a></li>
+		        
+					<li><a href="/instagram">我的相册</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="http://suifengqjn.github.io/" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/dearqjn?source=blog&is_all=1" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/#" title="rss">rss</a>
+			        
+						<a class="google" target="_blank" href="http://www.jianshu.com/users/527ecf8c8753/latest_articles" title="google">google</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-iOS卡顿监控" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/02/25/iOS卡顿监控/" class="article-date">
+  	<time datetime="2016-02-25T07:46:16.000Z" itemprop="datePublished">2016-02-25</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      iOS卡顿监控
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性能/">性能</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/iOS/">iOS</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在移动设备上开发软件,性能一直是我们最为关心的话题之一,我们作为程序员除了需要努力提高代码质量之外,及时发现和监控软件中那些造成性能低下的”罪魁祸首”也是我们神圣的职责.</p>
+</blockquote>
+<p>众所周知,iOS平台因为UIKit本身的特性,需要将所有的UI操作都放在主线程执行,所以也造成不少程序员都习惯将一些线程安全性不确定的逻辑,以及其它线程结束后的汇总工作等等放到了主线,所以主线程中包含的这些大量计算、IO、绘制都有可能造成卡顿.</p>
+<p>在Xcode中已经集成了非常方便的调试工具Instruments,它可以帮助我们在开发测试阶段分析软件运行的性能消耗,但一款软件经过测试流程和实验室分析肯定是不够的,在正式环境中由大量用户在使用过程中监控、分析到的数据更能解决一些隐藏的问题.<br><a id="more"></a><br><br></p>
+<h3 id="寻找卡顿的切入点"><a href="#寻找卡顿的切入点" class="headerlink" title="寻找卡顿的切入点"></a>寻找卡顿的切入点</h3><blockquote>
+<p>监控卡顿,最直接就是找到主线程都在干些啥玩意儿.我们知道一个线程的消息事件处理都是依赖于NSRunLoop来驱动,所以要知道线程正在调用什么方法,就需要从NSRunLoop来入手.CFRunLoop的代码是开源,可以在此处查阅到源代码<a href="http://opensource.apple.com/source/CF/CF-1151.16/CFRunLoop.c,其中核心方法CFRunLoopRun简化后的主要逻辑大概是这样的" target="_blank" rel="external">http://opensource.apple.com/source/CF/CF-1151.16/CFRunLoop.c,其中核心方法CFRunLoopRun简化后的主要逻辑大概是这样的</a>:<br><br></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int32_t __CFRunLoopRun()&#10;&#123;&#10;    //&#36890;&#30693;&#21363;&#23558;&#36827;&#20837;runloop&#10;    __CFRunLoopDoObservers(KCFRunLoopEntry);&#10;    &#10;    do&#10;    &#123;&#10;        // &#36890;&#30693;&#23558;&#35201;&#22788;&#29702;timer&#21644;source&#10;        __CFRunLoopDoObservers(kCFRunLoopBeforeTimers);&#10;        __CFRunLoopDoObservers(kCFRunLoopBeforeSources);&#10;        &#10;        __CFRunLoopDoBlocks();  //&#22788;&#29702;&#38750;&#24310;&#36831;&#30340;&#20027;&#32447;&#31243;&#35843;&#29992;&#10;        __CFRunLoopDoSource0(); //&#22788;&#29702;UIEvent&#20107;&#20214;&#10;        &#10;        //GCD dispatch main queue&#10;        CheckIfExistMessagesInMainDispatchQueue();&#10;        &#10;        // &#21363;&#23558;&#36827;&#20837;&#20241;&#30496;&#10;        __CFRunLoopDoObservers(kCFRunLoopBeforeWaiting);&#10;        &#10;        // &#31561;&#24453;&#20869;&#26680;mach_msg&#20107;&#20214;&#10;        mach_port_t wakeUpPort = SleepAndWaitForWakingUpPorts();&#10;        &#10;        // Zzz...&#10;        &#10;        // &#20174;&#31561;&#24453;&#20013;&#37266;&#26469;&#10;        __CFRunLoopDoObservers(kCFRunLoopAfterWaiting);&#10;        &#10;        // &#22788;&#29702;&#22240;timer&#30340;&#21796;&#37266;&#10;        if (wakeUpPort == timerPort)&#10;            __CFRunLoopDoTimers();&#10;        &#10;        // &#22788;&#29702;&#24322;&#27493;&#26041;&#27861;&#21796;&#37266;,&#22914;dispatch_async&#10;        else if (wakeUpPort == mainDispatchQueuePort)&#10;            __CFRUNLOOP_IS_SERVICING_THE_MAIN_DISPATCH_QUEUE__()&#10;            &#10;        // UI&#21047;&#26032;,&#21160;&#30011;&#26174;&#31034;&#10;        else&#10;            __CFRunLoopDoSource1();&#10;        &#10;        // &#20877;&#27425;&#30830;&#20445;&#26159;&#21542;&#26377;&#21516;&#27493;&#30340;&#26041;&#27861;&#38656;&#35201;&#35843;&#29992;&#10;        __CFRunLoopDoBlocks();&#10;        &#10;    &#125; while (!stop &#38;&#38; !timeout);&#10;    &#10;    //&#36890;&#30693;&#21363;&#23558;&#36864;&#20986;runloop&#10;    __CFRunLoopDoObservers(CFRunLoopExit);&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<blockquote>
+<p>不难发现NSRunLoop调用方法主要就是在kCFRunLoopBeforeSources和kCFRunLoopBeforeWaiting之间,还有kCFRunLoopAfterWaiting之后,也就是如果我们发现这两个时间内耗时太长,那么就可以判定出此时主线程卡顿.</p>
+</blockquote>
+<p><br></p>
+<p>###量化卡顿的程度</p>
+<blockquote>
+<p>要监控NSRunLoop的状态,我们需要使用到CFRunLoopObserverRef,通过它可以实时获得这些状态值的变化,具体的使用如下:</p>
+</blockquote>
+<p><br></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">static void runLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info)&#10;&#123;&#10;    MyClass *object = (__bridge MyClass*)info;&#10;    object-&#62;activity = activity;&#10;&#125;&#10;&#10;- (void)registerObserver&#10;&#123;&#10;    CFRunLoopObserverContext context = &#123;0,(__bridge void*)self,NULL,NULL&#125;;&#10;    CFRunLoopObserverRef observer = CFRunLoopObserverCreate(kCFAllocatorDefault,&#10;                                                            kCFRunLoopAllActivities,&#10;                                                            YES,&#10;                                                            0,&#10;                                                            &#38;runLoopObserverCallBack,&#10;                                                            &#38;context);&#10;    CFRunLoopAddObserver(CFRunLoopGetMain(), observer, kCFRunLoopCommonModes);&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<blockquote>
+<p>只需要另外再开启一个线程,实时计算这两个状态区域之间的耗时是否到达某个阀值,便能揪出这些性能杀手.<br>为了让计算更精确,需要让子线程更及时的获知主线程NSRunLoop状态变化,所以dispatch_semaphore_t是个不错的选择,另外卡顿需要覆盖到多次连续小卡顿和单次长时间卡顿两种情景,所以判定条件也需要做适当优化.将上面两个方法添加计算的逻辑如下:</p>
+</blockquote>
+<p><br></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">static void runLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info)&#10;&#123;&#10;    MyClass *object = (__bridge MyClass*)info;&#10;    &#10;    // &#35760;&#24405;&#29366;&#24577;&#20540;&#10;    object-&#62;activity = activity;&#10;    &#10;    // &#21457;&#36865;&#20449;&#21495;&#10;    dispatch_semaphore_t semaphore = moniotr-&#62;semaphore;&#10;    dispatch_semaphore_signal(semaphore);&#10;&#125;&#10;&#10;- (void)registerObserver&#10;&#123;&#10;    CFRunLoopObserverContext context = &#123;0,(__bridge void*)self,NULL,NULL&#125;;&#10;    CFRunLoopObserverRef observer = CFRunLoopObserverCreate(kCFAllocatorDefault,&#10;                                                            kCFRunLoopAllActivities,&#10;                                                            YES,&#10;                                                            0,&#10;                                                            &#38;runLoopObserverCallBack,&#10;                                                            &#38;context);&#10;    CFRunLoopAddObserver(CFRunLoopGetMain(), observer, kCFRunLoopCommonModes);&#10;    &#10;    // &#21019;&#24314;&#20449;&#21495;&#10;    semaphore = dispatch_semaphore_create(0);&#10;    &#10;    // &#22312;&#23376;&#32447;&#31243;&#30417;&#25511;&#26102;&#38271;&#10;    dispatch_async(dispatch_get_global_queue(0, 0), ^&#123;&#10;        while (YES)&#10;        &#123;&#10;            // &#20551;&#23450;&#36830;&#32493;5&#27425;&#36229;&#26102;50ms&#35748;&#20026;&#21345;&#39039;(&#24403;&#28982;&#20063;&#21253;&#21547;&#20102;&#21333;&#27425;&#36229;&#26102;250ms)&#10;            long st = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, 50*NSEC_PER_MSEC));&#10;            if (st != 0)&#10;            &#123;&#10;                if (activity==kCFRunLoopBeforeSources || activity==kCFRunLoopAfterWaiting)&#10;                &#123;&#10;                    if (++timeoutCount &#60; 5)&#10;                        continue;&#10;                    &#10;                    NSLog(@&#34;&#22909;&#20687;&#26377;&#28857;&#20799;&#21345;&#21734;&#34;);&#10;                &#125;&#10;            &#125;&#10;            timeoutCount = 0;&#10;        &#125;&#10;    &#125;);&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>###记录卡顿的函数调用</p>
+<p><br></p>
+<blockquote>
+<p>监控到了卡顿现场,当然下一步便是记录此时的函数调用信息,此处可以使用一个第三方Crash收集组件PLCrashReporter,它不仅可以收集Crash信息也可用于实时获取各线程的调用堆栈,使用示例如下:</p>
+</blockquote>
+<p><br></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PLCrashReporterConfig *config = [[PLCrashReporterConfig alloc] initWithSignalHandlerType:PLCrashReporterSignalHandlerTypeBSD&#10;                                                                   symbolicationStrategy:PLCrashReporterSymbolicationStrategyAll];&#10;PLCrashReporter *crashReporter = [[PLCrashReporter alloc] initWithConfiguration:config];&#10;&#10;NSData *data = [crashReporter generateLiveReport];&#10;PLCrashReport *reporter = [[PLCrashReport alloc] initWithData:data error:NULL];&#10;NSString *report = [PLCrashReportTextFormatter stringValueForCrashReport:reporter&#10;                                                          withTextFormat:PLCrashReportTextFormatiOS];&#10;&#10;NSLog(@&#34;------------\n%@\n------------&#34;, report);</span><br></pre></td></tr></table></figure>
+<p>当检测到卡顿时,抓取堆栈信息,然后在客户端做一些过滤处理,便可以上报到服务器,通过收集一定量的卡顿数据后经过分析便能准确定位需要优化的逻辑,至此这个实时卡顿监控就大功告成了!</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/02/25/iOS视频边下边播-缓存视频数据流/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          iOS视频边下边播--缓存视频数据流
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis">
+  <div class="sharing addthis_toolbox share">
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="iOS卡顿监控" data-title="iOS卡顿监控" data-url="http://suifengqjn/github.io/2016/02/25/iOS卡顿监控/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"yqxm"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 夜千寻墨
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://www.jianshu.com/users/527ecf8c8753/latest_articles/" target="_blank">suifeng</a>   <a href="http://www.jianshu.com/users/527ecf8c8753/latest_articles/" target="_blank">blog</a> Copyright © 2016
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  </div>
+</body>
+</html>
