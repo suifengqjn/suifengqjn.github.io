@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="suifeng‘blog">
 <meta property="og:description" content="google搜索“iOS视频变下边播”，有好几篇博客写到了实现方法，其实只有一篇，其他都是copy的，不过他们都是使用的本地代理服务器的方式，原理很简单，但是缺点也很明显，需要自己写一个本地代理服务器或者使用第三方库httpSever。如果使用httpSever作为本地代理服务器，如果只缓存一个视频是没有问题的，如果缓存多个视频互相切换，本地代理服务器提供的数据很不稳定，crash概率非常大。">
 <meta property="og:image" content="https://raw.githubusercontent.com/suifengqjn/TBPlayer/master/TBPlayer/TBPlayer/screenShot/1.png">
-<meta property="og:updated_time" content="2016-02-25T08:08:16.000Z">
+<meta property="og:updated_time" content="2016-02-25T08:08:30.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS视频边下边播--缓存视频数据流">
 <meta name="twitter:description" content="google搜索“iOS视频变下边播”，有好几篇博客写到了实现方法，其实只有一篇，其他都是copy的，不过他们都是使用的本地代理服务器的方式，原理很简单，但是缺点也很明显，需要自己写一个本地代理服务器或者使用第三方库httpSever。如果使用httpSever作为本地代理服务器，如果只缓存一个视频是没有问题的，如果缓存多个视频互相切换，本地代理服务器提供的数据很不稳定，crash概率非常大。">
@@ -422,12 +422,17 @@
     	<div class="footer-left">
     		&copy; 2016 夜千寻墨
     	</div>
+    	<span id="busuanzi_container_site_uv">
+       本站访客数<span id="busuanzi_value_site_uv"></span>人次
+       </span>
       	<div class="footer-right">
       		<a href="http://www.jianshu.com/users/527ecf8c8753/latest_articles/" target="_blank">suifeng</a>   <a href="http://www.jianshu.com/users/527ecf8c8753/latest_articles/" target="_blank">blog</a> Copyright © 2016
       	</div>
     </div>
   </div>
 </footer>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
     </div>
     
   <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
